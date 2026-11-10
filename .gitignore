@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# Java / Maven
+target/
+*.class
+
+# Logs
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+secrets.json
