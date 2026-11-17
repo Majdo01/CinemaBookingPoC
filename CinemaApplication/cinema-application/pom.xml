@@ -56,6 +56,25 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Flyway: versioned schema migrations -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<!-- Spring Boot 4 ships Flyway auto-configuration in its own module;
+		     without it the migrations on the classpath are never executed. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-flyway</artifactId>
+		</dependency>
+
+		<!-- PostgreSQL support for Flyway (required since Flyway 10) -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
 		<!-- gRPC -->
 		<dependency>
 			<groupId>io.grpc</groupId>
