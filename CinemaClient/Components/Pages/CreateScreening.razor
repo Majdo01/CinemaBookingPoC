@@ -1,0 +1,162 @@
+﻿@page "/screenings/create"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Create Screening</PageTitle>
+<h1>Create Screening</h1>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="model" OnValidSubmit="SubmitAsync" FormName="createScreening">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">Movie</label>
+        <InputSelect @bind-Value="model.MovieTitle" class="form-select">
+            <option value="">-- select a movie --</option>
+            @foreach (var movie in movies)
+            {
+                <option value="@movie">@movie</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => model.MovieTitle" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Date</label>
+        <InputDate @bind-Value="model.Date" class="form-control" />
+        <ValidationMessage For="() => model.Date" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Time</label>
+        <InputSelect @bind-Value="model.Time" class="form-select">
+            <option value="">-- select a time --</option>
+            @foreach (var time in times)
+            {
+                <option value="@time">@time</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => model.Time" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Room</label>
+        <InputSelect @bind-Value="model.Room" class="form-select">
+            <option value="">-- select a room --</option>
+            @foreach (var room in rooms)
+            {
+                <option value="@room">@room</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => model.Room" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+        @(isSubmitting ? "Creating..." : "Create Screening")
+    </button>
+</EditForm>
+
+@code {
+
+    private static readonly string[] movies =
+    {
+        "Dune: Part Two",
+        "Oppenheimer",
+        "The Grand Budapest Hotel",
+        "Perfect Days"
+    };
+
+    private static readonly string[] rooms = { "Sal 1", "Sal 2", "Sal 3" };
+
+    private static readonly string[] times = { "10:00", "13:00", "16:00", "18:30", "21:00" };
+
+    private ScreeningForm model = new();
+    private bool isSubmitting;
+    private string? successMessage;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        isSubmitting = true;
+        successMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            DateTime startTime = model.Date!.Value.Date.Add(TimeSpan.Parse(model.Time!));
+
+            var payload = new
+            {
+                movieTitle = model.MovieTitle,
+                startTime = startTime.ToString("s"),
+                room = model.Room
+            };
+
+            HttpClient client = HttpClientFactory.CreateClient("CinemaApi");
+            using HttpResponseMessage response = await client.PostAsJsonAsync("api/screenings", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage =
+                    $"Screening of \"{model.MovieTitle}\" created in {model.Room} " +
+                    $"on {startTime:dd.MM.yyyy} at {startTime:HH:mm}.";
+
+                model = new ScreeningForm();
+            }
+            else
+            {
+                errorMessage = await ReadErrorAsync(response);
+            }
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            errorMessage = "Could not reach the Cinema API. Is it running on http://localhost:5287?";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
+    {
+        if (response.StatusCode == System.Net.HttpStatusCode.NotImplemented)
+        {
+            return "The server does not support creating screenings yet (501 Not Implemented).";
+        }
+
+        try
+        {
+            ApiProblem? problem = await response.Content.ReadFromJsonAsync<ApiProblem>();
+
+            if (!string.IsNullOrWhiteSpace(problem?.Error))
+            {
+                return problem!.Error!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(problem?.Detail))
+            {
+                return problem!.Detail!;
+            }
+        }
+        catch
+        {
+            // Body was not JSON - fall through to the generic message.
+        }
+
+        return $"Could not create the screening (HTTP {(int)response.StatusCode}).";
+    }
+
+    private sealed record ApiProblem(string? Error, string? Detail);
+}
