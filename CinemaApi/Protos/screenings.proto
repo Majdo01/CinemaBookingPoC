@@ -1,4 +1,3 @@
-
 syntax = "proto3";
 
 package cinema;
@@ -22,6 +21,19 @@ message ScreeningList {
   repeated Screening screenings = 1;
 }
 
+message CreateScreeningRequest {
+  string movie_title = 1;
+  string start_time = 2;
+  string room = 3;
+}
+
+message CreateScreeningResponse {
+  bool success = 1;
+  string message = 2;
+  Screening screening = 3;
+}
+
 service ScreeningService {
   rpc ListScreenings(EmptyRequest) returns (ScreeningList);
+  rpc CreateScreening(CreateScreeningRequest) returns (CreateScreeningResponse);
 }

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2240" height="1740" viewBox="0 0 2240 1740">
+<defs><style><![CDATA[
+text{font-family:Arial,Helvetica,sans-serif;fill:#000;}
+]]></style></defs>
+<rect x="0" y="0" width="2240" height="1740" fill="#fff"/>
+<text x="60" y="46" font-size="21" text-anchor="lm" dominant-baseline="central" font-weight="bold">Cinema Booking System - UML Class Diagram</text>
+<text x="60" y="76" font-size="12" text-anchor="lm" dominant-baseline="central">Only functionality that exists in the source code is shown.</text>
+<rect x="45" y="105" width="360" height="467" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="45" y="105" width="187" height="22" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="57" y="116" font-size="12" text-anchor="lm" dominant-baseline="central">CinemaClient  (Blazor Server)</text>
+<rect x="535" y="105" width="350" height="465" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="535" y="105" width="248" height="22" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="547" y="116" font-size="12" text-anchor="lm" dominant-baseline="central">CinemaApi  (ASP.NET Core minimal API)</text>
+<rect x="955" y="105" width="850" height="735" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="955" y="105" width="208" height="22" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="967" y="116" font-size="12" text-anchor="lm" dominant-baseline="central">gRPC contract  (screenings.proto)</text>
+<rect x="45" y="945" width="1760" height="717" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="45" y="945" width="234" height="22" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="57" y="956" font-size="12" text-anchor="lm" dominant-baseline="central">CinemaApplication  (Spring Boot, JPA)</text>
+<rect x="1845" y="1395" width="340" height="202" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="1845" y="1395" width="195" height="22" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1857" y="1406" font-size="12" text-anchor="lm" dominant-baseline="central">PostgreSQL  (cinema_booking)</text>
+<rect x="70" y="150" width="310" height="192" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="225.0" y="158.5" font-size="11" text-anchor="mm" dominant-baseline="central">«Razor component»</text>
+<text x="225.0" y="177.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">Home</text>
+<line x1="70" y1="190" x2="380" y2="190" stroke="#000" stroke-width="1"/>
+<line x1="70" y1="266" x2="380" y2="266" stroke="#000" stroke-width="1"/>
+<text x="82" y="206.5" font-size="12" text-anchor="lm" dominant-baseline="central">- screenings : List&lt;ScreeningDto&gt;</text>
+<text x="82" y="223.5" font-size="12" text-anchor="lm" dominant-baseline="central">- isLoading : bool</text>
+<text x="82" y="240.5" font-size="12" text-anchor="lm" dominant-baseline="central">- errorMessage : string?</text>
+<text x="82" y="257.5" font-size="12" text-anchor="lm" dominant-baseline="central">- httpClientFactory : IHttpClientFactory</text>
+<text x="82" y="282.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ OnInitializedAsync() : Task</text>
+<text x="82" y="299.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ LoadScreenings() : Task</text>
+<text x="82" y="316.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ FormatDate(value : string) : string</text>
+<text x="82" y="333.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ FormatTime(value : string) : string</text>
+<rect x="70" y="430" width="310" height="112" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="225.0" y="442.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">Home.ScreeningDto</text>
+<line x1="70" y1="455" x2="380" y2="455" stroke="#000" stroke-width="1"/>
+<line x1="70" y1="531" x2="380" y2="531" stroke="#000" stroke-width="1"/>
+<text x="82" y="471.5" font-size="12" text-anchor="lm" dominant-baseline="central">- id : long</text>
+<text x="82" y="488.5" font-size="12" text-anchor="lm" dominant-baseline="central">- movieTitle : string</text>
+<text x="82" y="505.5" font-size="12" text-anchor="lm" dominant-baseline="central">- startTime : string</text>
+<text x="82" y="522.5" font-size="12" text-anchor="lm" dominant-baseline="central">- room : string</text>
+<rect x="560" y="150" width="300" height="92" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="710.0" y="162.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">Program</text>
+<line x1="560" y1="175" x2="860" y2="175" stroke="#000" stroke-width="1"/>
+<line x1="560" y1="200" x2="860" y2="200" stroke="#000" stroke-width="1"/>
+<text x="572" y="191.5" font-size="12" text-anchor="lm" dominant-baseline="central">- grpcServerUrl : string</text>
+<text x="572" y="216.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ MapGet("/api/screenings")</text>
+<text x="572" y="233.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ MapPost("/api/screenings", dto)</text>
+<rect x="560" y="430" width="300" height="110" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="710.0" y="438.5" font-size="11" text-anchor="mm" dominant-baseline="central">«record»</text>
+<text x="710.0" y="457.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">CreateScreeningRequestDto</text>
+<line x1="560" y1="470" x2="860" y2="470" stroke="#000" stroke-width="1"/>
+<line x1="560" y1="529" x2="860" y2="529" stroke="#000" stroke-width="1"/>
+<text x="572" y="486.5" font-size="12" text-anchor="lm" dominant-baseline="central">- MovieTitle : string</text>
+<text x="572" y="503.5" font-size="12" text-anchor="lm" dominant-baseline="central">- StartTime : string</text>
+<text x="572" y="520.5" font-size="12" text-anchor="lm" dominant-baseline="central">- Room : string</text>
+<rect x="980" y="150" width="360" height="93" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1160.0" y="158.5" font-size="11" text-anchor="mm" dominant-baseline="central">«interface, from screenings.proto»</text>
+<text x="1160.0" y="177.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningService</text>
+<line x1="980" y1="190" x2="1340" y2="190" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="201" x2="1340" y2="201" stroke="#000" stroke-width="1"/>
+<text x="992" y="217.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ listScreenings(EmptyRequest) : ScreeningList</text>
+<text x="992" y="234.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ createScreening(req) : CreateScreeningResponse</text>
+<rect x="980" y="430" width="380" height="93" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1170.0" y="438.5" font-size="11" text-anchor="mm" dominant-baseline="central">«generated C# client»</text>
+<text x="1170.0" y="457.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningServiceClient</text>
+<line x1="980" y1="470" x2="1360" y2="470" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="481" x2="1360" y2="481" stroke="#000" stroke-width="1"/>
+<text x="992" y="497.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ ListScreeningsAsync(EmptyRequest)</text>
+<text x="992" y="514.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ CreateScreeningAsync(CreateScreeningRequest)</text>
+<rect x="980" y="700" width="310" height="110" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1135.0" y="708.5" font-size="11" text-anchor="mm" dominant-baseline="central">«message»</text>
+<text x="1135.0" y="727.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">CreateScreeningRequest</text>
+<line x1="980" y1="740" x2="1290" y2="740" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="799" x2="1290" y2="799" stroke="#000" stroke-width="1"/>
+<text x="992" y="756.5" font-size="12" text-anchor="lm" dominant-baseline="central">- movie_title : string</text>
+<text x="992" y="773.5" font-size="12" text-anchor="lm" dominant-baseline="central">- start_time : string</text>
+<text x="992" y="790.5" font-size="12" text-anchor="lm" dominant-baseline="central">- room : string</text>
+<rect x="1330" y="700" width="330" height="110" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1495.0" y="708.5" font-size="11" text-anchor="mm" dominant-baseline="central">«message»</text>
+<text x="1495.0" y="727.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">CreateScreeningResponse</text>
+<line x1="1330" y1="740" x2="1660" y2="740" stroke="#000" stroke-width="1"/>
+<line x1="1330" y1="799" x2="1660" y2="799" stroke="#000" stroke-width="1"/>
+<text x="1342" y="756.5" font-size="12" text-anchor="lm" dominant-baseline="central">- success : bool</text>
+<text x="1342" y="773.5" font-size="12" text-anchor="lm" dominant-baseline="central">- message : string</text>
+<text x="1342" y="790.5" font-size="12" text-anchor="lm" dominant-baseline="central">- screening : Screening</text>
+<rect x="1480" y="150" width="300" height="127" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1630.0" y="158.5" font-size="11" text-anchor="mm" dominant-baseline="central">«message»</text>
+<text x="1630.0" y="177.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">Screening</text>
+<line x1="1480" y1="190" x2="1780" y2="190" stroke="#000" stroke-width="1"/>
+<line x1="1480" y1="266" x2="1780" y2="266" stroke="#000" stroke-width="1"/>
+<text x="1492" y="206.5" font-size="12" text-anchor="lm" dominant-baseline="central">- id : int64</text>
+<text x="1492" y="223.5" font-size="12" text-anchor="lm" dominant-baseline="central">- movie_title : string</text>
+<text x="1492" y="240.5" font-size="12" text-anchor="lm" dominant-baseline="central">- start_time : string</text>
+<text x="1492" y="257.5" font-size="12" text-anchor="lm" dominant-baseline="central">- room : string</text>
+<rect x="1480" y="350" width="300" height="76" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1630.0" y="358.5" font-size="11" text-anchor="mm" dominant-baseline="central">«message»</text>
+<text x="1630.0" y="377.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningList</text>
+<line x1="1480" y1="390" x2="1780" y2="390" stroke="#000" stroke-width="1"/>
+<line x1="1480" y1="415" x2="1780" y2="415" stroke="#000" stroke-width="1"/>
+<text x="1492" y="406.5" font-size="12" text-anchor="lm" dominant-baseline="central">- screenings : repeated Screening</text>
+<rect x="980" y="990" width="430" height="93" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1195.0" y="998.5" font-size="11" text-anchor="mm" dominant-baseline="central">«abstract, generated»</text>
+<text x="1195.0" y="1017.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningServiceImplBase</text>
+<line x1="980" y1="1030" x2="1410" y2="1030" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="1041" x2="1410" y2="1041" stroke="#000" stroke-width="1"/>
+<text x="992" y="1057.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ listScreenings(EmptyRequest, StreamObserver)</text>
+<text x="992" y="1074.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ createScreening(CreateScreeningRequest, StreamObserver)</text>
+<rect x="980" y="1210" width="400" height="90" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1180.0" y="1218.5" font-size="11" text-anchor="mm" dominant-baseline="central">«@Service»</text>
+<text x="1180.0" y="1237.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningGrpcService</text>
+<line x1="980" y1="1250" x2="1380" y2="1250" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="1275" x2="1380" y2="1275" stroke="#000" stroke-width="1"/>
+<text x="992" y="1266.5" font-size="12" text-anchor="lm" dominant-baseline="central">- screeningRepository : ScreeningRepository</text>
+<text x="992" y="1291.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ listScreenings(EmptyRequest, StreamObserver)</text>
+<rect x="70" y="1210" width="230" height="76" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="185.0" y="1218.5" font-size="11" text-anchor="mm" dominant-baseline="central">«@SpringBootApplication»</text>
+<text x="185.0" y="1237.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">CinemaApplication</text>
+<line x1="70" y1="1250" x2="300" y2="1250" stroke="#000" stroke-width="1"/>
+<line x1="70" y1="1261" x2="300" y2="1261" stroke="#000" stroke-width="1"/>
+<text x="82" y="1277.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ main(args : String[]) : void</text>
+<rect x="450" y="1210" width="250" height="76" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="575.0" y="1218.5" font-size="11" text-anchor="mm" dominant-baseline="central">«@Configuration»</text>
+<text x="575.0" y="1237.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">GrpcServerConfig</text>
+<line x1="450" y1="1250" x2="700" y2="1250" stroke="#000" stroke-width="1"/>
+<line x1="450" y1="1261" x2="700" y2="1261" stroke="#000" stroke-width="1"/>
+<text x="462" y="1277.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ grpcServer(service) : Server</text>
+<rect x="1470" y="1210" width="310" height="93" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1625.0" y="1218.5" font-size="11" text-anchor="mm" dominant-baseline="central">«interface, Spring Data»</text>
+<text x="1625.0" y="1237.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningRepository</text>
+<line x1="1470" y1="1250" x2="1780" y2="1250" stroke="#000" stroke-width="1"/>
+<line x1="1470" y1="1261" x2="1780" y2="1261" stroke="#000" stroke-width="1"/>
+<text x="1482" y="1277.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ findAll() : List&lt;ScreeningEntity&gt;</text>
+<text x="1482" y="1294.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ save(entity) : ScreeningEntity</text>
+<rect x="1470" y="1440" width="310" height="192" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="1625.0" y="1448.5" font-size="11" text-anchor="mm" dominant-baseline="central">«@Entity»</text>
+<text x="1625.0" y="1467.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">ScreeningEntity</text>
+<line x1="1470" y1="1480" x2="1780" y2="1480" stroke="#000" stroke-width="1"/>
+<line x1="1470" y1="1556" x2="1780" y2="1556" stroke="#000" stroke-width="1"/>
+<text x="1482" y="1496.5" font-size="12" text-anchor="lm" dominant-baseline="central">- id : Long</text>
+<text x="1482" y="1513.5" font-size="12" text-anchor="lm" dominant-baseline="central">- movieTitle : String</text>
+<text x="1482" y="1530.5" font-size="12" text-anchor="lm" dominant-baseline="central">- startTime : LocalDateTime</text>
+<text x="1482" y="1547.5" font-size="12" text-anchor="lm" dominant-baseline="central">- room : String</text>
+<text x="1482" y="1572.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ getId() : Long</text>
+<text x="1482" y="1589.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ getMovieTitle() : String</text>
+<text x="1482" y="1606.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ getStartTime() : LocalDateTime</text>
+<text x="1482" y="1623.5" font-size="12" text-anchor="lm" dominant-baseline="central">+ getRoom() : String</text>
+<rect x="1870" y="1440" width="290" height="127" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<text x="2015.0" y="1448.5" font-size="11" text-anchor="mm" dominant-baseline="central">«table»</text>
+<text x="2015.0" y="1467.5" font-size="13" text-anchor="mm" dominant-baseline="central" font-weight="bold">screenings</text>
+<line x1="1870" y1="1480" x2="2160" y2="1480" stroke="#000" stroke-width="1"/>
+<line x1="1870" y1="1556" x2="2160" y2="1556" stroke="#000" stroke-width="1"/>
+<text x="1882" y="1496.5" font-size="12" text-anchor="lm" dominant-baseline="central">- id : BIGINT PK</text>
+<text x="1882" y="1513.5" font-size="12" text-anchor="lm" dominant-baseline="central">- movie_title : VARCHAR(255)</text>
+<text x="1882" y="1530.5" font-size="12" text-anchor="lm" dominant-baseline="central">- start_time : TIMESTAMP(6)</text>
+<text x="1882" y="1547.5" font-size="12" text-anchor="lm" dominant-baseline="central">- room : VARCHAR(255)</text>
+<line x1="560" y1="200" x2="549.0" y2="204.62" stroke="#000" stroke-width="1"/>
+<line x1="560" y1="200" x2="549.0" y2="195.38" stroke="#000" stroke-width="1"/>
+<polyline points="380,200 560,200" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="394.0" y="183.0" width="152" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="470.0" y="191.0" font-size="11" text-anchor="mm" dominant-baseline="central">«HTTP GET /api/screenings»</text>
+<polygon points="225,342 219.0,350.0 225.0,358.0 231.0,350.0" fill="#000000" stroke="#000" stroke-width="1"/>
+<polyline points="225,342 225,430" fill="none" stroke="#000" stroke-width="1"/>
+<text x="233.0" y="347.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="233.0" y="407.0" font-size="11" text-anchor="lm" dominant-baseline="central">0..*</text>
+<line x1="710" y1="430" x2="705.38" y2="419.0" stroke="#000" stroke-width="1"/>
+<line x1="710" y1="430" x2="714.62" y2="419.0" stroke="#000" stroke-width="1"/>
+<polyline points="710,242 710,430" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="715.0" y="328.0" width="44" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="719.0" y="336.0" font-size="11" text-anchor="lm" dominant-baseline="central">«uses»</text>
+<line x1="980" y1="470" x2="969.0" y2="474.62" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="470" x2="969.0" y2="465.38" stroke="#000" stroke-width="1"/>
+<polyline points="860,190 880,190 880,470 980,470" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="759.0" y="383.6" width="116" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="871.0" y="391.6" font-size="11" text-anchor="rm" dominant-baseline="central">«creates per request»</text>
+<text x="866.0" y="180.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="974.0" y="460.0" font-size="11" text-anchor="rm" dominant-baseline="central">0..*</text>
+<line x1="1120" y1="243" x2="1124.62" y2="254.0" stroke="#000" stroke-width="1"/>
+<line x1="1120" y1="243" x2="1115.38" y2="254.0" stroke="#000" stroke-width="1"/>
+<polyline points="1120,430 1120,243" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="1125.0" y="328.5" width="115" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1129.0" y="336.5" font-size="11" text-anchor="lm" dominant-baseline="central">«gRPC over HTTP/2»</text>
+<line x1="1150" y1="700" x2="1145.38" y2="689.0" stroke="#000" stroke-width="1"/>
+<line x1="1150" y1="700" x2="1154.62" y2="689.0" stroke="#000" stroke-width="1"/>
+<polyline points="1150,523 1150,700" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="1155.0" y="603.5" width="50" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1159.0" y="611.5" font-size="11" text-anchor="lm" dominant-baseline="central">«sends»</text>
+<line x1="1495" y1="700" x2="1490.38" y2="689.0" stroke="#000" stroke-width="1"/>
+<line x1="1495" y1="700" x2="1499.62" y2="689.0" stroke="#000" stroke-width="1"/>
+<polyline points="1360,470 1385,470 1385,680 1495,680 1495,700" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="1390.0" y="567.0" width="62" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1394.0" y="575.0" font-size="11" text-anchor="lm" dominant-baseline="central">«receives»</text>
+<polygon points="1630,350 1636.0,342.0 1630.0,334.0 1624.0,342.0" fill="#000000" stroke="#000" stroke-width="1"/>
+<polyline points="1630,350 1630,277" fill="none" stroke="#000" stroke-width="1"/>
+<text x="1638.0" y="327.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="1638.0" y="282.0" font-size="11" text-anchor="lm" dominant-baseline="central">0..*</text>
+<polygon points="1660,760 1668.0,766.0 1676.0,760.0 1668.0,754.0" fill="#000000" stroke="#000" stroke-width="1"/>
+<polyline points="1660,760 1800,760 1800,200 1780,200" fill="none" stroke="#000" stroke-width="1"/>
+<text x="1666.0" y="750.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="1802.0" y="190.0" font-size="11" text-anchor="rm" dominant-baseline="central">0..1</text>
+<polygon points="980,190 965.0,197.0 965.0,183.0" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<polyline points="980,1030 940,1030 940,190 980,190" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<polygon points="1150,1083 1157.0,1098.0 1143.0,1098.0" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<polyline points="1150,1210 1150,1083" fill="none" stroke="#000" stroke-width="1"/>
+<line x1="1470" y1="1250" x2="1459.0" y2="1254.62" stroke="#000" stroke-width="1"/>
+<line x1="1470" y1="1250" x2="1459.0" y2="1245.38" stroke="#000" stroke-width="1"/>
+<polyline points="1380,1250 1470,1250" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="1403.0" y="1233.0" width="44" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1425.0" y="1241.0" font-size="11" text-anchor="mm" dominant-baseline="central">«uses»</text>
+<text x="1386.0" y="1240.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="1464.0" y="1240.0" font-size="11" text-anchor="rm" dominant-baseline="central">1</text>
+<line x1="980" y1="1240" x2="969.0" y2="1244.62" stroke="#000" stroke-width="1"/>
+<line x1="980" y1="1240" x2="969.0" y2="1235.38" stroke="#000" stroke-width="1"/>
+<polyline points="700,1240 980,1240" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="808.5" y="1223.0" width="63" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="840.0" y="1231.0" font-size="11" text-anchor="mm" dominant-baseline="central">«registers»</text>
+<text x="706.0" y="1230.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="974.0" y="1230.0" font-size="11" text-anchor="rm" dominant-baseline="central">1</text>
+<line x1="450" y1="1240" x2="439.0" y2="1244.62" stroke="#000" stroke-width="1"/>
+<line x1="450" y1="1240" x2="439.0" y2="1235.38" stroke="#000" stroke-width="1"/>
+<polyline points="300,1240 450,1240" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="339.0" y="1223.0" width="72" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="375.0" y="1231.0" font-size="11" text-anchor="mm" dominant-baseline="central">«bootstraps»</text>
+<line x1="1625" y1="1440" x2="1620.38" y2="1429.0" stroke="#000" stroke-width="1"/>
+<line x1="1625" y1="1440" x2="1629.62" y2="1429.0" stroke="#000" stroke-width="1"/>
+<polyline points="1625,1303 1625,1440" fill="none" stroke="#000" stroke-width="1"/>
+<rect x="1630.0" y="1363.5" width="59" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1634.0" y="1371.5" font-size="11" text-anchor="lm" dominant-baseline="central">«persists»</text>
+<text x="1633.0" y="1308.0" font-size="11" text-anchor="lm" dominant-baseline="central">1</text>
+<text x="1633.0" y="1417.0" font-size="11" text-anchor="lm" dominant-baseline="central">0..*</text>
+<line x1="1870" y1="1490" x2="1859.0" y2="1494.62" stroke="#000" stroke-width="1"/>
+<line x1="1870" y1="1490" x2="1859.0" y2="1485.38" stroke="#000" stroke-width="1"/>
+<polyline points="1780,1490 1870,1490" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+<rect x="1795.5" y="1473.0" width="59" height="15" fill="#ffffff" stroke="#000" stroke-width="0"/>
+<text x="1825.0" y="1481.0" font-size="11" text-anchor="mm" dominant-baseline="central">«maps to»</text>
+<rect x="100" y="1390" width="520" height="63" fill="#ffffff" stroke="#000" stroke-width="1"/>
+<line x1="607" y1="1390" x2="607" y2="1403" stroke="#000" stroke-width="1"/>
+<line x1="607" y1="1403" x2="620" y2="1403" stroke="#000" stroke-width="1"/>
+<text x="111" y="1404" font-size="11" text-anchor="lm" dominant-baseline="central">createScreening is declared in screenings.proto and is called by the C# API, but</text>
+<text x="111" y="1419" font-size="11" text-anchor="lm" dominant-baseline="central">ScreeningGrpcService overrides only listScreenings. The generated base class therefore answers</text>
+<text x="111" y="1434" font-size="11" text-anchor="lm" dominant-baseline="central">UNIMPLEMENTED, which the C# API maps to HTTP 501 Not Implemented.</text>
+<line x1="620" y1="1421.5" x2="985" y2="1268" stroke="#000" stroke-width="1" stroke-dasharray="6 4"/>
+</svg>
