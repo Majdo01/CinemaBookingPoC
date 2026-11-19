@@ -1,13 +1,11 @@
 package dk.via.cinema.service;
 
 import dk.via.cinema.entity.ScreeningEntity;
+import dk.via.cinema.grpc.*;
 import dk.via.cinema.repository.ScreeningRepository;
-import dk.via.cinema.grpc.EmptyRequest;
-import dk.via.cinema.grpc.Screening;
-import dk.via.cinema.grpc.ScreeningList;
-import dk.via.cinema.grpc.ScreeningServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 
 @Service
 public class ScreeningGrpcService
@@ -49,4 +47,38 @@ public class ScreeningGrpcService
       responseObserver.onError(exception);
     }
   }
+
+  @Override
+  public void createScreening(
+      CreateScreeningRequest request,
+      StreamObserver<CreateScreeningResponse> responseObserver){
+    try
+    {
+      LocalDateTime startTime = LocalDateTime.parse(request.getStartTime());
+
+      ScreeningEntity entity = new ScreeningEntity(request.getMovieTitle(), startTime, request.getRoom());
+
+      ScreeningEntity savedEntity = screeningRepository.save(entity);
+
+      Screening screening = Screening.newBuilder()
+          .setId(savedEntity.getId())
+          .setMovieTitle(savedEntity.getMovieTitle())
+          .setStartTime(savedEntity.getStartTime().toString())
+          .setRoom(savedEntity.getRoom())
+          .build();
+
+      CreateScreeningResponse response = CreateScreeningResponse.newBuilder()
+          .setSuccess(true)
+          .setMessage("Screening created successfully.")
+          .setScreening(screening)
+          .build();
+
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+
+    } catch (Exception exception){
+      responseObserver.onError(exception);
+    }
+  }
+
 }

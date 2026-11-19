@@ -20,6 +20,12 @@ public class ScreeningEntity {
   @Column(nullable = false)
   private String room;
 
+  public ScreeningEntity(String movieTitle, LocalDateTime startTime, String room){
+    this.movieTitle = movieTitle;
+    this.startTime = startTime;
+    this.room = room;
+  }
+
   public ScreeningEntity() {
   }
 
