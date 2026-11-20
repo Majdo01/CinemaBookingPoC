@@ -1,6 +1,28 @@
 @CinemaApi_HostAddress = http://localhost:5287
 
-GET {{CinemaApi_HostAddress}}/weatherforecast/
+GET {{CinemaApi_HostAddress}}/api/screenings
 Accept: application/json
+
+###
+
+POST {{CinemaApi_HostAddress}}/api/screenings
+Content-Type: application/json
+
+{
+  "movieTitle": "Perfect Days",
+  "startTime": "2026-12-05T21:00:00",
+  "room": "Sal 2"
+}
+
+###
+
+POST {{CinemaApi_HostAddress}}/api/screenings
+Content-Type: application/json
+
+{
+  "movieTitle": "Perfect Days",
+  "startTime": "tomorrow evening",
+  "room": "Sal 2"
+}
 
 ###

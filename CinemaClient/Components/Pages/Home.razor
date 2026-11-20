@@ -1,5 +1,5 @@
-﻿
 @page "/"
+@rendermode InteractiveServer
 @using System.Net.Http.Json
 @using System.Globalization
 @using System.Text.Json.Serialization
@@ -9,6 +9,10 @@
 
 <h1>Cinema Booking</h1>
 <p>Available movie screenings</p>
+
+<button class="btn btn-secondary mb-3" @onclick="LoadScreenings" disabled="@isLoading">
+    Refresh
+</button>
 
 @if (isLoading)
 {

@@ -1,28 +1,45 @@
 using Cinema.Grpc;
-using Grpc.Net.Client;
 
 namespace CinemaApi.Services;
 
+/// <summary>
+/// Thin wrapper around the generated gRPC client. The channel and the client
+/// are created once by the DI container (see Program.cs) and reused for every
+/// request, so no connection is set up per call.
+/// </summary>
 public class ScreeningGrpcService : IScreeningService
 {
-    private readonly string grpcServerUrl = "http://localhost:9090";
+    private static readonly TimeSpan CallTimeout = TimeSpan.FromSeconds(10);
 
-    public async Task<ScreeningList> GetScreeningsAsync()
+    private readonly ScreeningService.ScreeningServiceClient client;
+
+    public ScreeningGrpcService(ScreeningService.ScreeningServiceClient client)
     {
-        using var channel = GrpcChannel.ForAddress(grpcServerUrl);
+        this.client = client;
+    }
 
-        var client = new ScreeningService.ScreeningServiceClient(channel);
-
-        return await client.ListScreeningsAsync(new EmptyRequest());
+    public async Task<ScreeningList> GetScreeningsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await client
+            .ListScreeningsAsync(
+                new EmptyRequest(),
+                deadline: CallDeadline,
+                cancellationToken: cancellationToken)
+            .ResponseAsync;
     }
 
     public async Task<CreateScreeningResponse> CreateScreeningAsync(
-        CreateScreeningRequest request)
+        CreateScreeningRequest request,
+        CancellationToken cancellationToken = default)
     {
-        using var channel = GrpcChannel.ForAddress(grpcServerUrl);
-
-        var client = new ScreeningService.ScreeningServiceClient(channel);
-
-        return await client.CreateScreeningAsync(request);
+        return await client
+            .CreateScreeningAsync(
+                request,
+                deadline: CallDeadline,
+                cancellationToken: cancellationToken)
+            .ResponseAsync;
     }
+
+    private static DateTime CallDeadline => DateTime.UtcNow.Add(CallTimeout);
 }

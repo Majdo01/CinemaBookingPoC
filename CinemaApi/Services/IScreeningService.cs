@@ -4,8 +4,10 @@ namespace CinemaApi.Services;
 
 public interface IScreeningService
 {
-    Task<ScreeningList> GetScreeningsAsync();
+    Task<ScreeningList> GetScreeningsAsync(
+        CancellationToken cancellationToken = default);
 
     Task<CreateScreeningResponse> CreateScreeningAsync(
-        CreateScreeningRequest request);
+        CreateScreeningRequest request,
+        CancellationToken cancellationToken = default);
 }

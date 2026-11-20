@@ -5,9 +5,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+string cinemaApiBaseUrl = builder.Configuration["CinemaApi:BaseUrl"] is { Length: > 0 } configuredUrl
+    ? configuredUrl
+    : "http://localhost:5287/";
+
 builder.Services.AddHttpClient("CinemaApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5287/");
+    client.BaseAddress = new Uri(cinemaApiBaseUrl);
 });
 
 var app = builder.Build();

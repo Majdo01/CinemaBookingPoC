@@ -1,5 +1,6 @@
-﻿@page "/screenings/create"
+@page "/screenings/create"
 @rendermode InteractiveServer
+@using System.Globalization
 @using System.Net.Http.Json
 @inject IHttpClientFactory HttpClientFactory
 
@@ -68,6 +69,8 @@
 
 @code {
 
+    // Reference data for the PoC: the same movies, rooms and time slots the
+    // seeded database uses. There is no Movie/Room management subsystem yet.
     private static readonly string[] movies =
     {
         "Dune: Part Two",
@@ -87,18 +90,24 @@
 
     private async Task SubmitAsync()
     {
+        if (isSubmitting)
+        {
+            return;
+        }
+
         isSubmitting = true;
         successMessage = null;
         errorMessage = null;
 
         try
         {
-            DateTime startTime = model.Date!.Value.Date.Add(TimeSpan.Parse(model.Time!));
+            DateTime startTime = model.Date!.Value.Date
+                .Add(TimeSpan.Parse(model.Time!, CultureInfo.InvariantCulture));
 
             var payload = new
             {
                 movieTitle = model.MovieTitle,
-                startTime = startTime.ToString("s"),
+                startTime = startTime.ToString("s", CultureInfo.InvariantCulture),
                 room = model.Room
             };
 
@@ -111,6 +120,7 @@
                     $"Screening of \"{model.MovieTitle}\" created in {model.Room} " +
                     $"on {startTime:dd.MM.yyyy} at {startTime:HH:mm}.";
 
+                // Only a successful creation clears the form.
                 model = new ScreeningForm();
             }
             else
@@ -131,11 +141,6 @@
 
     private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
     {
-        if (response.StatusCode == System.Net.HttpStatusCode.NotImplemented)
-        {
-            return "The server does not support creating screenings yet (501 Not Implemented).";
-        }
-
         try
         {
             ApiProblem? problem = await response.Content.ReadFromJsonAsync<ApiProblem>();
@@ -143,11 +148,6 @@
             if (!string.IsNullOrWhiteSpace(problem?.Error))
             {
                 return problem!.Error!;
-            }
-
-            if (!string.IsNullOrWhiteSpace(problem?.Detail))
-            {
-                return problem!.Detail!;
             }
         }
         catch
@@ -158,5 +158,5 @@
         return $"Could not create the screening (HTTP {(int)response.StatusCode}).";
     }
 
-    private sealed record ApiProblem(string? Error, string? Detail);
+    private sealed record ApiProblem(string? Error);
 }
