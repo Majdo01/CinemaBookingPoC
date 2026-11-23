@@ -1,0 +1,371 @@
+﻿@page "/screenings/{ScreeningId:long}/reserve"
+@namespace CinemaClient.Components.Pages.Student
+@rendermode InteractiveServer
+@using System.Net
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>Reserve a seat</PageTitle>
+
+<h1>Reserve a seat</h1>
+
+@if (isLoading)
+{
+    <p>Loading seats...</p>
+}
+else if (screeningMissing)
+{
+    <div class="alert alert-warning">This screening is no longer available.</div>
+    <button class="btn btn-primary" @onclick="BackToScreenings">Back to screenings</button>
+}
+else if (screening is null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+    <button class="btn btn-secondary" @onclick="LoadAsync">Try again</button>
+}
+else
+{
+    <div class="mb-3">
+        <h2 class="h4">@screening.MovieTitle</h2>
+
+        <dl class="row mb-0">
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@screening.DisplayDate</dd>
+
+            <dt class="col-sm-2">Start time</dt>
+            <dd class="col-sm-10">@screening.DisplayTime</dd>
+
+            <dt class="col-sm-2">Room</dt>
+            <dd class="col-sm-10">@screening.Room</dd>
+        </dl>
+    </div>
+
+    <ul class="seat-key">
+        <li class="seat-key-item">
+            <span class="seat-key-swatch seat-free"></span> Available
+        </li>
+        <li class="seat-key-item">
+            <span class="seat-key-swatch seat-selected"></span> Selected
+        </li>
+        <li class="seat-key-item">
+            <span class="seat-key-swatch seat-taken"></span> Reserved
+        </li>
+    </ul>
+
+    <div class="seat-map" role="group" aria-label="Seat map for @screening.Room">
+        @foreach (SeatRow row in Rows)
+        {
+            <div class="seat-row" @key="row.Label">
+                <span class="seat-row-label">@row.Label</span>
+
+                @foreach (SeatCell seat in row.Seats)
+                {
+                    <button type="button"
+                            class="seat @(seat.Taken ? "seat-taken" : seat.Selected ? "seat-selected" : "seat-free")"
+                            disabled="@(seat.Taken || isSoldOut || isSubmitting)"
+                            aria-pressed="@seat.Selected.ToString().ToLowerInvariant()"
+                            aria-label="@($"Seat {seat.Label}{(seat.Taken ? ", reserved" : string.Empty)}")"
+                            title="Seat @seat.Label"
+                            @key="seat.Label"
+                            @onclick="() => SelectSeat(seat)">
+                        @seat.Number
+                    </button>
+                }
+            </div>
+        }
+    </div>
+
+    @if (isSoldOut)
+    {
+        <div class="alert alert-warning">
+            This screening is sold out. All seats are reserved.
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(seatMapError))
+    {
+        <div class="alert alert-danger">@seatMapError</div>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(confirmationMessage))
+    {
+        <div class="alert alert-success">@confirmationMessage</div>
+    }
+
+    @if (selection is not null && !isSoldOut)
+    {
+        <div class="alert alert-info mt-3">
+            <p>
+                Selected seat: <strong>@SeatLabel(selection.Row, selection.Number)</strong>
+                (row @selection.Row, seat @selection.Number)
+            </p>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary"
+                        @onclick="ConfirmAsync"
+                        disabled="@isSubmitting">
+                    @(isSubmitting ? "Reserving..." : "Confirm reservation")
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                        @onclick="ClearSelection"
+                        disabled="@isSubmitting">
+                    Clear selection
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-secondary btn-sm"
+                @onclick="LoadAsync"
+                disabled="@isSubmitting">
+            Refresh seats
+        </button>
+
+        <button class="btn btn-outline-secondary btn-sm"
+                @onclick="BackToScreenings"
+                disabled="@isSubmitting">
+            Back to screenings
+        </button>
+    </div>
+}
+
+@code {
+    // Rows are 1-based and only turned into letters for display.
+    private const int RowCount = 8;
+    private const int SeatsPerRow = 8;
+   
+    [Parameter]
+    public long ScreeningId { get; set; }
+    private readonly HashSet<string> reservedSeats = new(StringComparer.OrdinalIgnoreCase);
+
+    private ScreeningDto? screening;
+    private SeatSelection? selection;
+    private string? confirmationMessage;
+    private string? errorMessage;
+    private string? seatMapError;
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private bool screeningMissing;
+    
+    private int TotalSeats => RowCount * SeatsPerRow;
+    private bool isSoldOut => reservedSeats.Count >= TotalSeats;
+
+    private IReadOnlyList<SeatRow> Rows
+    {
+        get
+        {
+            List<SeatRow> rows = new();
+
+            for (int row = 1; row <= RowCount; row++)
+            {
+                List<SeatCell> seats = new();
+
+                for (int number = 1; number <= SeatsPerRow; number++)
+                {
+                    bool isSelected = selection is { } current
+                                      && current.Row == row
+                                      && current.Number == number;
+                    string label = SeatLabel(row, number);
+
+                    seats.Add(new SeatCell(
+                        row,
+                        number,
+                        label,
+                        reservedSeats.Contains(label),
+                        isSelected));
+                }
+                rows.Add(new SeatRow(RowLabel(row), seats));
+            }
+            return rows;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        screeningMissing = false;
+        screening = null;
+        selection = null;
+        confirmationMessage = null;
+        errorMessage = null;
+        seatMapError = null;
+        reservedSeats.Clear();
+
+        HttpClient client = HttpClientFactory.CreateClient("CinemaApi");
+        try
+        {
+            // The API has no GET-by-id, so the screening comes from the list endpoint.
+            List<ScreeningDto> screenings =
+                await client.GetFromJsonAsync<List<ScreeningDto>>("api/screenings")
+                ?? new List<ScreeningDto>();
+
+            screening = screenings.FirstOrDefault(item => item.Id == ScreeningId);
+            screeningMissing = screening is null;
+
+            if (screening is not null)
+            {
+                await LoadReservedSeatsAsync(client);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            errorMessage = "Could not load the screening. Is the Cinema API running?";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadReservedSeatsAsync(HttpClient client)
+    {
+        try
+        {
+            using HttpResponseMessage response =
+                await client.GetAsync($"api/screenings/{ScreeningId}/reservations");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                seatMapError =
+                    $"The reserved seats could not be loaded (HTTP {(int)response.StatusCode}).";
+                return;
+            }
+
+            List<ReservedSeatDto>? seats =
+                await response.Content.ReadFromJsonAsync<List<ReservedSeatDto>>();
+
+            reservedSeats.Clear();
+            
+            foreach (ReservedSeatDto seat in seats ?? new List<ReservedSeatDto>())
+            {
+                string label = NormalizeSeatLabel(seat.SeatNumber);
+
+                if (label.Length > 0)
+                {
+                    reservedSeats.Add(label);
+                }
+            }
+            seatMapError = null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            seatMapError = "The reserved seats could not be loaded.";
+        }
+    }
+    
+    private void SelectSeat(SeatCell seat)
+    {
+        if (isSubmitting || isSoldOut || seat.Taken)
+        {
+            return;
+        }
+
+        selection = new SeatSelection(seat.Row, seat.Number);
+        confirmationMessage = null;
+        errorMessage = null;
+    }
+    
+    private void ClearSelection()
+    {
+        selection = null;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (screening is null || selection is null)
+        {
+            return;
+        }
+
+        int row = selection.Row;
+        int number = selection.Number;
+        string seatNumber = SeatLabel(row, number);
+
+        isSubmitting = true;
+        errorMessage = null;
+        confirmationMessage = null;
+
+        HttpClient client = HttpClientFactory.CreateClient("CinemaApi");
+
+        try
+        {
+            // Same shape as the Java column: one seat string, e.g. "A5".
+            using HttpResponseMessage response = await client.PostAsJsonAsync(
+                $"api/screenings/{ScreeningId}/reservations",
+                new { seatNumber });
+
+            if (response.IsSuccessStatusCode)
+            {
+                confirmationMessage =
+                    $"Seat {seatNumber} is reserved for " +
+                    $"{screening.MovieTitle}, {screening.DisplayDate} at {screening.DisplayTime} " +
+                    $"in {screening.Room}.";
+
+                selection = null;
+            }
+            else if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                errorMessage = "This seat has just been taken by another student.";
+                selection = null;
+            }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                errorMessage = "The selected seat is not valid for this screening.";
+                selection = null;
+            }
+            else
+            {
+                // Keep the seat selected so the student can simply try again.
+                errorMessage = "The reservation could not be saved. Please try again.";
+            }
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            errorMessage = "Could not reach the Cinema API. The reservation was not saved.";
+        }
+        finally
+        {
+            // Always re-read availability, whatever the outcome.
+            await LoadReservedSeatsAsync(client);
+            isSubmitting = false;
+        }
+    }
+
+    private void BackToScreenings()
+    { 
+        Navigation.NavigateTo("/"); 
+    }
+
+    private static string RowLabel(int row) => ((char)('A' + row - 1)).ToString();
+    private static string SeatLabel(int row, int seatNumber) => $"{RowLabel(row)}{seatNumber}";
+
+    /// Trim spaces and upper-case, so "a5 " coming back from the API still matches A5.
+    private static string NormalizeSeatLabel(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Trim().Replace(" ", string.Empty).ToUpperInvariant();
+    }
+
+    private sealed record SeatSelection(int Row, int Number);
+    private sealed record SeatCell(int Row, int Number, string Label, bool Taken, bool Selected);
+    private sealed record SeatRow(string Label, IReadOnlyList<SeatCell> Seats);
+}

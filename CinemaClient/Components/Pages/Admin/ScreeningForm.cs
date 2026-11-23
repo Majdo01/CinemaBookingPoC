@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CinemaClient.Components.Pages;
+namespace CinemaClient.Components.Pages.Admin;
 
 public class ScreeningForm : IValidatableObject
 {

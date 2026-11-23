@@ -1,8 +1,6 @@
 @page "/"
 @rendermode InteractiveServer
-@using System.Net.Http.Json
 @using System.Globalization
-@using System.Text.Json.Serialization
 @inject IHttpClientFactory HttpClientFactory
 
 <PageTitle>Cinema Booking</PageTitle>
@@ -49,6 +47,11 @@ else
                     <strong>Room:</strong>
                     @screening.Room
                 </p>
+                
+                <a class="btn btn-primary btn-sm mt-2"
+                   href="@($"screenings/{screening.Id}/reserve")">
+                    Reserve seat
+                </a>
             </article>
         }
     </div>
@@ -119,20 +122,5 @@ else
         return date == DateTime.MinValue
             ? value
             : date.ToString("HH:mm");
-    }
-
-    public sealed class ScreeningDto
-    {
-        [JsonPropertyName("id")]
-        public long Id { get; set; }
-
-        [JsonPropertyName("movieTitle")]
-        public string MovieTitle { get; set; } = string.Empty;
-
-        [JsonPropertyName("startTime")]
-        public string StartTime { get; set; } = string.Empty;
-
-        [JsonPropertyName("room")]
-        public string Room { get; set; } = string.Empty;
     }
 }

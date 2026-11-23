@@ -1,9 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json.Serialization;
 
-namespace CinemaClient.Components.Pages;
-
-/// <summary>One item returned by GET /api/screenings.</summary>
+namespace CinemaClient.Models;
 public sealed class ScreeningDto
 {
     [JsonPropertyName("id")] public long Id { get; set; }
