@@ -1,6 +1,5 @@
 @page "/screenings/create"
 @rendermode InteractiveServer
-@using System.Globalization
 @using System.Net.Http.Json
 @inject IHttpClientFactory HttpClientFactory
 
@@ -9,7 +8,29 @@
 
 @if (!string.IsNullOrEmpty(successMessage))
 {
-    <div class="alert alert-success">@successMessage</div>
+    <div class="alert alert-success">
+        <p class="mb-2"><strong>@successMessage</strong></p>
+
+        @if (createdScreening is not null)
+        {
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Movie</dt>
+                <dd class="col-sm-9">@createdScreening.MovieTitle</dd>
+
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">@ScreeningDto.FormatDate(createdScreening.StartTime)</dd>
+
+                <dt class="col-sm-3">Start time</dt>
+                <dd class="col-sm-9">@ScreeningDto.FormatTime(createdScreening.StartTime)</dd>
+
+                <dt class="col-sm-3">Room</dt>
+                <dd class="col-sm-9">@createdScreening.Room</dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">Scheduled</dd>
+            </dl>
+        }
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -21,10 +42,10 @@
     <DataAnnotationsValidator />
 
     <div class="mb-3">
-        <label class="form-label">Movie</label>
-        <InputSelect @bind-Value="model.MovieTitle" class="form-select">
+        <label class="form-label" for="movie">Movie</label>
+        <InputSelect id="movie" @bind-Value="model.MovieTitle" class="form-select">
             <option value="">-- select a movie --</option>
-            @foreach (var movie in movies)
+            @foreach (string movie in movies)
             {
                 <option value="@movie">@movie</option>
             }
@@ -33,16 +54,16 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Date</label>
-        <InputDate @bind-Value="model.Date" class="form-control" />
+        <label class="form-label" for="date">Date</label>
+        <InputDate id="date" @bind-Value="model.Date" class="form-control" />
         <ValidationMessage For="() => model.Date" />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Time</label>
-        <InputSelect @bind-Value="model.Time" class="form-select">
+        <label class="form-label" for="time">Time</label>
+        <InputSelect id="time" @bind-Value="model.Time" class="form-select">
             <option value="">-- select a time --</option>
-            @foreach (var time in times)
+            @foreach (string time in times)
             {
                 <option value="@time">@time</option>
             }
@@ -51,10 +72,10 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Room</label>
-        <InputSelect @bind-Value="model.Room" class="form-select">
+        <label class="form-label" for="room">Room</label>
+        <InputSelect id="room" @bind-Value="model.Room" class="form-select">
             <option value="">-- select a room --</option>
-            @foreach (var room in rooms)
+            @foreach (string room in rooms)
             {
                 <option value="@room">@room</option>
             }
@@ -62,15 +83,61 @@
         <ValidationMessage For="() => model.Room" />
     </div>
 
-    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-        @(isSubmitting ? "Creating..." : "Create Screening")
-    </button>
+    @* Task 1: Cancel next to the submit button *@
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+            @(isSubmitting ? "Creating..." : "Create Screening")
+        </button>
+
+        <button type="button" class="btn btn-outline-secondary"
+                @onclick="Cancel" disabled="@isSubmitting">
+            Cancel
+        </button>
+    </div>
 </EditForm>
+
+<h2 class="h4 mt-4">Existing screenings</h2>
+
+@if (isLoadingScreenings)
+{
+    <p>Loading screenings...</p>
+}
+else if (!string.IsNullOrEmpty(screeningsError))
+{
+    <p class="text-danger">@screeningsError</p>
+    <button class="btn btn-secondary btn-sm" @onclick="LoadScreenings">Try again</button>
+}
+else if (FilteredScreenings.Count == 0)
+{
+    <p>No screenings scheduled for the selected room and date.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Movie</th>
+                <th>Date</th>
+                <th>Start time</th>
+                <th>Room</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ScreeningDto screening in FilteredScreenings)
+            {
+                <tr @key="screening.Id">
+                    <td>@screening.MovieTitle</td>
+                    <td>@screening.DisplayDate</td>
+                    <td>@screening.DisplayTime</td>
+                    <td>@screening.Room</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
 
-    // Reference data for the PoC: the same movies, rooms and time slots the
-    // seeded database uses. There is no Movie/Room management subsystem yet.
     private static readonly string[] movies =
     {
         "Dune: Part Two",
@@ -88,40 +155,119 @@
     private string? successMessage;
     private string? errorMessage;
 
-    private async Task SubmitAsync()
-    {
-        if (isSubmitting)
-        {
-            return;
-        }
+    private CreatedScreening? createdScreening;
 
-        isSubmitting = true;
-        successMessage = null;
-        errorMessage = null;
+    private List<ScreeningDto> screenings = new();
+    private bool isLoadingScreenings = true;
+    private string? screeningsError;
+
+    private IReadOnlyList<ScreeningDto> FilteredScreenings
+    {
+        get
+        {
+            IEnumerable<ScreeningDto> query = screenings;
+
+            if (!string.IsNullOrWhiteSpace(model.Room))
+            {
+                query = query.Where(s =>
+                    string.Equals(s.Room, model.Room, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (model.Date is { } date)
+            {
+                query = query.Where(s => s.StartTimeValue.Date == date.Date);
+            }
+
+            return query
+                .OrderBy(s => s.Room)
+                .ThenBy(s => s.StartTimeValue)
+                .ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScreenings();
+    }
+
+    private async Task LoadScreenings()
+    {
+        isLoadingScreenings = true;
+        screeningsError = null;
 
         try
         {
-            DateTime startTime = model.Date!.Value.Date
-                .Add(TimeSpan.Parse(model.Time!, CultureInfo.InvariantCulture));
+            HttpClient client = HttpClientFactory.CreateClient("CinemaApi");
+
+            screenings = await client.GetFromJsonAsync<List<ScreeningDto>>("api/screenings")
+                         ?? new List<ScreeningDto>();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            screenings = new List<ScreeningDto>();
+            screeningsError = "Could not load the existing screenings.";
+        }
+        finally
+        {
+            isLoadingScreenings = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        model = new ScreeningForm();
+        successMessage = null;
+        errorMessage = null;
+        createdScreening = null;
+    }
+
+    private async Task SubmitAsync()
+    {
+        isSubmitting = true;
+        successMessage = null;
+        errorMessage = null;
+        createdScreening = null;
+
+        try
+        {
+            DateTime startTime = model.Date!.Value.Date.Add(TimeSpan.Parse(model.Time!));
+
+            ScreeningDto? conflict = screenings.FirstOrDefault(s =>
+                string.Equals(s.Room, model.Room, StringComparison.OrdinalIgnoreCase)
+                && s.StartTimeValue == startTime);
+
+            if (conflict is not null)
+            {
+                errorMessage =
+                    $"The auditorium {conflict.Room} is already booked at that time: " +
+                    $"\"{conflict.MovieTitle}\", {conflict.DisplayDate} at {conflict.DisplayTime}. " +
+                    "Please choose another time or room.";
+                return;
+            }
 
             var payload = new
             {
                 movieTitle = model.MovieTitle,
-                startTime = startTime.ToString("s", CultureInfo.InvariantCulture),
+                startTime = startTime.ToString("s"),
                 room = model.Room
             };
 
             HttpClient client = HttpClientFactory.CreateClient("CinemaApi");
-            using HttpResponseMessage response = await client.PostAsJsonAsync("api/screenings", payload);
+            using HttpResponseMessage response =
+                await client.PostAsJsonAsync("api/screenings", payload);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage =
-                    $"Screening of \"{model.MovieTitle}\" created in {model.Room} " +
-                    $"on {startTime:dd.MM.yyyy} at {startTime:HH:mm}.";
+                createdScreening = await response.Content.ReadFromJsonAsync<CreatedScreening>();
 
-                // Only a successful creation clears the form.
+                successMessage = createdScreening is null
+                    ? "The screening was created."
+                    : $"Screening #{createdScreening.Id} created.";
+
                 model = new ScreeningForm();
+
+                await LoadScreenings();
             }
             else
             {
@@ -149,6 +295,11 @@
             {
                 return problem!.Error!;
             }
+
+            if (!string.IsNullOrWhiteSpace(problem?.Detail))
+            {
+                return problem!.Detail!;
+            }
         }
         catch
         {
@@ -158,5 +309,7 @@
         return $"Could not create the screening (HTTP {(int)response.StatusCode}).";
     }
 
-    private sealed record ApiProblem(string? Error);
+    public sealed record ApiProblem(string? Error, string? Detail);
+
+    public sealed record CreatedScreening(long Id, string MovieTitle, string StartTime, string Room);
 }

@@ -2,7 +2,7 @@
 
 namespace CinemaClient.Components.Pages;
 
-public class ScreeningForm
+public class ScreeningForm : IValidatableObject
 {
     [Required(ErrorMessage = "Please choose a movie.")]
     public string? MovieTitle { get; set; }
@@ -15,4 +15,14 @@ public class ScreeningForm
 
     [Required(ErrorMessage = "Please choose a room.")]
     public string? Room { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Date is { } date && date.Date < DateTime.Today)
+        {
+            yield return new ValidationResult(
+                "The screening date cannot be in the past.",
+                new[] {nameof(Date)});
+        }
+    }
 }
