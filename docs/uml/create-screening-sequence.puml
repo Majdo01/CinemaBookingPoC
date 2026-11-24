@@ -1,0 +1,85 @@
+@startuml create-screening-sequence
+' Cinema Booking PoC - UML sequence diagram for the first user story only:
+' "Create Screening". Every participant, message and step below exists in the
+' source code (see docs/uml/README.md for the file references).
+'
+' Render with PlantUML 1.2025.4:
+'   java -jar plantuml.jar -tsvg create-screening-sequence.puml
+'   java -jar plantuml.jar -tpng create-screening-sequence.puml
+
+title Create Screening
+
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam dpi 120
+skinparam sequenceMessageAlign left
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #000000
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBorderColor #000000
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ActorBorderColor #000000
+  ActorBackgroundColor #FFFFFF
+  ActorFontColor #000000
+  GroupBorderColor #000000
+  GroupHeaderFontColor #000000
+  GroupHeaderBackgroundColor #FFFFFF
+  GroupBackgroundColor #FFFFFF
+}
+
+actor "Student" as Student
+participant "Blazor Client\nCreateScreening.razor" as Blazor
+participant "C# Web API\nScreeningsController" as Api
+participant "C# gRPC Client\nScreeningGrpcService" as GrpcClient
+participant "Java gRPC Service\nScreeningGrpcService" as GrpcServer
+participant "Screening Repository\nScreeningRepository" as Repo
+database "PostgreSQL\nscreenings" as Db
+
+Student -> Blazor : 1. open Create Screening page (/screenings/create)
+activate Blazor
+Blazor --> Student : 2. display form\n(movie, date, time, room)
+deactivate Blazor
+
+Student -> Blazor : 3. select movie, date, time and room
+Student -> Blazor : 4. submit form
+activate Blazor
+Blazor -> Blazor : 5. validate form\n(ScreeningForm DataAnnotations)
+Blazor -> Blazor : 6. combine date and time\nstartTime = yyyy-MM-ddTHH:mm:ss
+Blazor -> Api : 7. POST /api/screenings\n{movieTitle, startTime, room}
+activate Api
+Api -> Api : 8. CreateScreeningRequestValidator.Validate(request)
+alt invalid input
+  Api --> Blazor : 9a. 400 Bad Request\n{ "error": "..." }
+  Blazor --> Student : 9a. error alert,\nform keeps its values
+else
+  Api -> GrpcClient : 9b. CreateScreeningAsync(request, 10 s deadline)
+  activate GrpcClient
+  GrpcClient -> GrpcServer : 10. gRPC CreateScreening(CreateScreeningRequest)
+  activate GrpcServer
+  GrpcServer -> GrpcServer : 11. trim fields, parse startTime\n(invalid -> INVALID_ARGUMENT)
+  GrpcServer -> Repo : 12. save(new ScreeningEntity(...))
+  activate Repo
+  Repo -> Db : 13. INSERT INTO screenings
+  activate Db
+  Db --> Repo : 14. generated id, stored row
+  deactivate Db
+  Repo --> GrpcServer : 15. saved ScreeningEntity
+  deactivate Repo
+  GrpcServer --> GrpcClient : 16. CreateScreeningResponse\n(success = true, screening)
+  deactivate GrpcServer
+  GrpcClient --> Api : 17. CreateScreeningResponse
+  deactivate GrpcClient
+  Api --> Blazor : 18. 201 Created\n{id, movieTitle, startTime, room}
+  Blazor -> Blazor : 19. show success message, reset form
+  Blazor --> Student : 20. success message, empty form
+end
+deactivate Api
+deactivate Blazor
+
+@enduml

@@ -33,7 +33,36 @@ message CreateScreeningResponse {
   Screening screening = 3;
 }
 
+// A reserved seat of one screening. seat_number is the seat label shown to the
+// student, for example "A5".
+message Reservation {
+  int64 id = 1;
+  int64 screening_id = 2;
+  string seat_number = 3;
+}
+
+message CreateReservationRequest {
+  int64 screening_id = 1;
+  string seat_number = 2;
+}
+
+message CreateReservationResponse {
+  bool success = 1;
+  string message = 2;
+  Reservation reservation = 3;
+}
+
+message ReservedSeatsRequest {
+  int64 screening_id = 1;
+}
+
+message ReservedSeatsResponse {
+  repeated Reservation reservations = 1;
+}
+
 service ScreeningService {
   rpc ListScreenings(EmptyRequest) returns (ScreeningList);
   rpc CreateScreening(CreateScreeningRequest) returns (CreateScreeningResponse);
+  rpc CreateReservation(CreateReservationRequest) returns (CreateReservationResponse);
+  rpc GetReservedSeats(ReservedSeatsRequest) returns (ReservedSeatsResponse);
 }

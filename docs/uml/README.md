@@ -84,3 +84,67 @@ appears in the `listScreenings` signatures.
   only the read path is wired from the UI.
 * `ScreeningEntity` has a no-argument constructor and getters only, so the
   create flow has no way to build an entity yet.
+
+---
+
+# UML Sequence Diagram – Create Screening
+
+A plain black-and-white UML sequence diagram of the first user story only
+("Create Screening"), drawn from the code that exists today. It is not an
+architecture diagram and it deliberately leaves out seats, bookings, payments
+and every other future user story.
+
+| File | What it is |
+| --- | --- |
+| `create-screening-sequence.puml` | Editable PlantUML source (the single source of truth) |
+| `create-screening-sequence.svg` | Vector export, 2101 × 1219 px |
+| `create-screening-sequence.png` | Raster export, 2100 × 1218 px (120 dpi) |
+
+Regenerate both exports after editing the source (PlantUML 1.2025.4 was used;
+quarterly releases of `plantuml.jar` from github.com/plantuml/plantuml work):
+
+```bash
+java -jar plantuml.jar -tsvg create-screening-sequence.puml
+java -jar plantuml.jar -tpng create-screening-sequence.puml
+```
+
+`create-screening-sequence.puml` is a PlantUML file, not an Astah project.
+Astah Professional is installed on the authoring machine, but its `.asta`
+project format has no documented non-interactive writer, so no native Astah
+project is shipped; the SVG can be placed on an Astah diagram as an image, or
+the diagram can be redrawn from the source in a few minutes.
+
+## Participants and where they come from
+
+| Participant | Source |
+| --- | --- |
+| Student | actor |
+| Blazor Client | `CinemaClient/Components/Pages/CreateScreening.razor`, `ScreeningForm.cs` |
+| C# Web API | `CinemaApi/Controllers/ScreeningsController.cs`, `Validation/CreateScreeningRequestValidator.cs` |
+| C# gRPC Client | `CinemaApi/Services/ScreeningGrpcService.cs` |
+| Java gRPC Service | `CinemaApplication/.../service/ScreeningGrpcService.java` |
+| Screening Repository | `CinemaApplication/.../repository/ScreeningRepository.java` |
+| PostgreSQL | `screenings` table, mapped by `ScreeningEntity` |
+
+## What the diagram shows
+
+Success path: form is filled in, the component validates it (`EditForm` with
+`DataAnnotationsValidator`), builds `startTime` as `yyyy-MM-ddTHH:mm:ss`,
+`POST /api/screenings`, the API validates the DTO, calls
+`CreateScreeningAsync` over gRPC with a 10 s deadline, the Java handler trims
+and parses the fields, saves a `ScreeningEntity` through the Spring Data
+repository, PostgreSQL returns the generated id, and the response travels back
+as `CreateScreeningResponse` → HTTP 201 → success alert with a cleared form.
+
+One `alt` fragment is drawn: `[invalid input]`, where the C# validator rejects
+the DTO and the API answers `400 Bad Request` with `{ "error": "..." }`, which
+the client shows in its error alert while keeping the entered values. The
+branch below the dashed divider is the valid-input success path; its guard is
+left off so the label does not run into the Student lifeline. Client-side
+DataAnnotations failures never reach the API, so they are not drawn as a second
+fragment; they are only mentioned in step 5.
+
+The gRPC transport failures that the API maps to HTTP (`INVALID_ARGUMENT` → 400,
+`UNIMPLEMENTED` → 501, `UNAVAILABLE` → 503, anything else → 502) are implemented
+in `ScreeningsController.GrpcFailure`, but they are left out of the drawing so
+the diagram keeps a single, readable fragment.
