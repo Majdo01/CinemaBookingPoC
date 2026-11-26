@@ -1,10 +1,10 @@
 using Cinema.Grpc;
 using CinemaApi.DTOs;
+using CinemaApi.Helpers;
 using CinemaApi.Services;
 using CinemaApi.Validation;
 using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
-using GrpcStatusCode = Grpc.Core.StatusCode;
 
 namespace CinemaApi.Controllers;
 
@@ -42,7 +42,7 @@ public class ScreeningsController : ControllerBase
         }
         catch (RpcException exception)
         {
-            return GrpcFailure(exception, "listing screenings");
+            return GrpcErrorHandler.GrpcFailure(exception, logger,"listing screenings");
         }
     }
 
@@ -56,7 +56,7 @@ public class ScreeningsController : ControllerBase
 
         if (validationErrors.Count > 0)
         {
-            return Error(
+            return GrpcErrorHandler.Error(
                 StatusCodes.Status400BadRequest,
                 string.Join(" ", validationErrors));
         }
@@ -74,7 +74,7 @@ public class ScreeningsController : ControllerBase
 
             if (!response.Success)
             {
-                return Error(
+                return GrpcErrorHandler.Error(
                     StatusCodes.Status400BadRequest,
                     string.IsNullOrWhiteSpace(response.Message)
                         ? "The screening could not be created."
@@ -95,46 +95,7 @@ public class ScreeningsController : ControllerBase
         }
         catch (RpcException exception)
         {
-            return GrpcFailure(exception, "creating a screening");
+            return GrpcErrorHandler.GrpcFailure(exception, logger, "creating a screening");
         }
-    }
-
-    private ObjectResult Error(int statusCode, string message) =>
-        new(new { error = message }) { StatusCode = statusCode };
-
-    /// <summary>
-    /// Translates a gRPC failure into the HTTP status codes the client
-    /// understands, without leaking server-side stack traces.
-    /// </summary>
-    private ObjectResult GrpcFailure(RpcException exception, string operation)
-    {
-        int statusCode = exception.StatusCode switch
-        {
-            GrpcStatusCode.InvalidArgument => StatusCodes.Status400BadRequest,
-            GrpcStatusCode.Unimplemented => StatusCodes.Status501NotImplemented,
-            GrpcStatusCode.Unavailable => StatusCodes.Status503ServiceUnavailable,
-            _ => StatusCodes.Status502BadGateway
-        };
-
-        string message = exception.StatusCode switch
-        {
-            GrpcStatusCode.InvalidArgument => string.IsNullOrWhiteSpace(exception.Status.Detail)
-                ? "The screening request was rejected by the Cinema application server."
-                : exception.Status.Detail,
-            GrpcStatusCode.Unimplemented =>
-                "The Cinema application server does not support this operation.",
-            GrpcStatusCode.Unavailable =>
-                "The Cinema application server is unavailable. Please try again later.",
-            _ => "The Cinema application server returned an unexpected error."
-        };
-
-        logger.LogWarning(
-            exception,
-            "gRPC call failed while {Operation}: {StatusCode} {Detail}",
-            operation,
-            exception.StatusCode,
-            exception.Status.Detail);
-
-        return Error(statusCode, message);
     }
 }

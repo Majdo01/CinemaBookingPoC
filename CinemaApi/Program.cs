@@ -20,6 +20,7 @@ builder.Services.AddSingleton(sp =>
     new ScreeningService.ScreeningServiceClient(
         sp.GetRequiredService<GrpcChannel>()));
 builder.Services.AddScoped<IScreeningService, ScreeningGrpcService>();
+builder.Services.AddScoped<IReservationService, ReservationGrpcService>();
 
 var app = builder.Build();
 
